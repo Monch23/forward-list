@@ -45,6 +45,7 @@ int list_init_fill(List *this, size_t size, int val) {
 	}
 
 	this->head = (Node*)malloc(sizeof(Node));
+	this->head->value = val;
 	Node *tmp = this->head;
 	
 	while (--size) {
@@ -67,10 +68,11 @@ int list_copy(List *this, const List *other) {
 	}
 
 	this->head = (Node*)malloc(sizeof(Node));
+	this->head->value = val;
 	Node *tmp = this->head;
 	Node *tmp2 = other->head;
 	
-	while (tmp2) {
+	while (tmp2->next) {
 		tmp->next = (Node*)malloc(sizeof(Node));
 		tmp->next->value = tmp2->next->value;
 		tmp = tmp->next;
@@ -94,10 +96,11 @@ int list_assign(List *this, const List *other) {
 		destroy_list(this);
 	}
 	this->head = (Node*)malloc(sizeof(Node));
+	this->head->value = val;
 	Node *tmp = this->head;
 	Node *tmp2 = other->head;
 
-	while (tmp2) {
+	while (tmp2->next) {
 		tmp->next = (Node*)malloc(sizeof(Node));
 		tmp->next->value = tmp2->next->value;
 		tmp = tmp->next;
@@ -118,12 +121,11 @@ int list_insert(List *this, size_t pos, int val) {
 		this->head = (Node*)malloc(sizeof(Node));
 		Node *tmp = this->head;
 		
-		while (pos--) {
-			tmp->next = (Node*)malloc(sizeof(Node));
-			tmp->next->value = val;
+		while (--pos) {
 			tmp = tmp->next;
 		}
-		
+		tmp->next
+		tmp->next->value = val;
 		return SUCCESS;
 	}
 
