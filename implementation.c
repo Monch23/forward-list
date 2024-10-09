@@ -2,15 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/*typedef enum err{
-	SUCCESS,
-	INV_PTR,
-    INV_DATA,
-	SAM_DATA,
-	INV_POS,
-    INV_ELEM,
-} errors;
-*/
 // destructors
 
 int clear_list(List *this) {
