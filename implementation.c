@@ -1,14 +1,41 @@
 #include "flist.h"
 #include <stdlib.h>
+#include <stdio.h>
 
-enum {
+/*typedef enum err{
 	SUCCESS,
 	INV_PTR,
+    INV_DATA,
 	SAM_DATA,
 	INV_POS,
+    INV_ELEM,
 } errors;
+*/
+// destructors
 
-// destructor
+int clear_list(List *this) {
+    if (this == NULL) {
+        return INV_PTR;
+    }
+    if (this->head == NULL) {
+        return SUCCESS;
+    }
+    if (this->head->next == NULL) {
+        list_pop_front(this);
+        return SUCCESS;
+    }
+
+    Node *nxt = this->head->next;
+
+    while (nxt) {
+        free(this->head);
+        this->head = nxt;
+        nxt = nxt->next;
+    }
+
+    this->head = NULL;
+    return SUCCESS;
+}
 
 int destroy_list(List *this) {
 	if (this == NULL) {
@@ -96,8 +123,9 @@ int list_assign(List *this, const List *other) {
 	if (this->head != NULL) {
 		destroy_list(this);
 	}
-	this->head = (Node*)malloc(sizeof(Node));
-	this->head->value = val;
+
+    this->head = (Node*)malloc(sizeof(Node));
+	this->head->value = other->head->value;
 	Node *tmp = this->head;
 	Node *tmp2 = other->head;
 
@@ -113,21 +141,53 @@ int list_assign(List *this, const List *other) {
 
 // modifiers
 
+int list_push_front(List *this, int val) {
+    if (this == NULL) {
+        return INV_PTR;
+    }
+    
+    Node *saveHead = this->head;
+    this->head = (Node*)malloc(sizeof(Node));
+    this->head->value = val;
+    this->head->next = saveHead;
+
+    return SUCCESS;
+}
+
+int list_pop_front(List *this) {
+    if (this == NULL) {
+        return INV_PTR;
+    }
+    if (this->head == NULL) {
+        return INV_DATA;
+    }
+    if (this->head->next == NULL) {
+        free(this->head);
+        this->head = NULL;
+        return SUCCESS;
+    }
+
+    Node *tmp = this->head->next;
+    free(this->head);
+    this->head = tmp;
+    tmp = NULL;
+    
+    return SUCCESS;
+}
+
 int list_insert(List *this, size_t pos, int val) {
 	if (this == NULL) {
 		return INV_PTR;
 	}
 
 	if (this->head == NULL && pos == 0) {
-		list_init_fill(this, 1, val);
+		this->head = (Node*)malloc(sizeof(Node));
+        this->head->value = val;
 		return SUCCESS;
 	}
 	if (!pos) {
-		Node *saveHead = this->head;
-		Node *newNode = (Node*)malloc(sizeof(Node));
-		this->head = newNode;
-		newNode->next = saveHead;
-		return SUCCESS;
+		list_push_front(this, val);
+        return SUCCESS;
 	}
 
 	Node *tmp = this->head;
@@ -141,7 +201,7 @@ int list_insert(List *this, size_t pos, int val) {
 
 	Node *saveNext = tmp->next;
 	tmp->next = (Node*)malloc(sizeof(Node));
-	tmp->next->value = val;
+    tmp->next->value = val;
 	tmp = tmp->next;
 	tmp->next = saveNext;
 
@@ -157,14 +217,14 @@ int list_erase(List *this, int val) {
 	Node *nxt = this->head;
 	
 	while (nxt) {
-		if (nxt->value == val) {
+        if (nxt->value == val) {
 			if (prev == NULL) {
 				nxt = nxt->next;
 				free(this->head);
 				this->head = nxt;
 			} else {
-				prev = nxt->next;
-				free(nxt);
+				prev->next = nxt->next;
+				free(nxt); 
 				nxt = prev->next;
 			}
 		} else {
@@ -172,8 +232,64 @@ int list_erase(List *this, int val) {
 			nxt = nxt->next;
 		}
 	}
-
+    
 	return SUCCESS;
 }
 
+int find_in_list(const List* this, int val) {
+    if (this == NULL) {
+        return INV_PTR;
+    }
 
+    Node *find = this->head;
+    int index = 0;
+
+    while (find) {
+        if (find->value == val) {
+            printf("value finded in %d index \n", index);
+            return SUCCESS;
+        }
+        find = find->next;
+        ++index;
+    }
+
+    return INV_ELEM;
+}
+
+size_t list_size(const List *this) {
+    if (this == NULL) {
+        return INV_PTR;
+    }
+    if (this->head == NULL) {
+        return 0;
+    }
+
+    size_t size = 0;
+    Node *tmp = this->head;
+
+    while (tmp) {
+        ++size;
+        tmp = tmp->next;
+    }
+
+    return size;
+}
+
+int print_list(const List *this) {
+    if (this == NULL) {
+        return INV_PTR;
+    }
+    if (this->head == NULL) {
+        return INV_DATA;
+    }
+
+    Node *tmp = this->head;
+
+    while (tmp) {
+        printf("%d ", tmp->value);
+        tmp = tmp->next;
+    }
+    
+    putchar(10);
+    return SUCCESS;
+}
