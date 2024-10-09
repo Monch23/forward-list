@@ -5,6 +5,7 @@ enum {
 	SUCCESS,
 	INV_PTR,
 	SAM_DATA,
+	INV_POS,
 } errors;
 
 // destructor
@@ -68,15 +69,15 @@ int list_copy(List *this, const List *other) {
 	}
 
 	this->head = (Node*)malloc(sizeof(Node));
-	this->head->value = val;
+	this->head->value = other->head->value;
 	Node *tmp = this->head;
-	Node *tmp2 = other->head;
+	Node *otherTmp = other->head;
 	
-	while (tmp2->next) {
+	while (otherTmp->next) {
 		tmp->next = (Node*)malloc(sizeof(Node));
-		tmp->next->value = tmp2->next->value;
+		tmp->next->value = otherTmp->next->value;
 		tmp = tmp->next;
-		tmp2 = tmp2->next;
+		otherTmp = otherTmp->next;
 	}
 
 	tmp->next = NULL;
@@ -117,25 +118,62 @@ int list_insert(List *this, size_t pos, int val) {
 		return INV_PTR;
 	}
 
-	if (this->head == NULL) {
-		this->head = (Node*)malloc(sizeof(Node));
-		Node *tmp = this->head;
-		
-		while (--pos) {
-			tmp = tmp->next;
-		}
-		tmp->next
-		tmp->next->value = val;
+	if (this->head == NULL && pos == 0) {
+		list_init_fill(this, 1, val);
+		return SUCCESS;
+	}
+	if (!pos) {
+		Node *saveHead = this->head;
+		Node *newNode = (Node*)malloc(sizeof(Node));
+		this->head = newNode;
+		newNode->next = saveHead;
 		return SUCCESS;
 	}
 
-	Node *saveHead = this->head;
+	Node *tmp = this->head;
 	
-	while (count--) {
-		
+	while (--pos) {
+		if (tmp->next == NULL && pos) {
+			return INV_POS;
+		}
+		tmp = tmp->next;
 	}
+
+	Node *saveNext = tmp->next;
+	tmp->next = (Node*)malloc(sizeof(Node));
+	tmp->next->value = val;
+	tmp = tmp->next;
+	tmp->next = saveNext;
+
+	return SUCCESS;
 }
 
+int list_erase(List *this, int val) {
+	if (this == NULL) {
+		return INV_PTR;
+	}
+	
+	Node *prev = NULL;
+	Node *nxt = this->head;
+	
+	while (nxt) {
+		if (nxt->value == val) {
+			if (prev == NULL) {
+				nxt = nxt->next;
+				free(this->head);
+				this->head = nxt;
+			} else {
+				prev = nxt->next;
+				free(nxt);
+				nxt = prev->next;
+			}
+		} else {
+			prev = nxt;
+			nxt = nxt->next;
+		}
+	}
 
+	return SUCCESS;
+}
 
 
