@@ -284,3 +284,33 @@ int print_list(const List *this) {
     putchar(10);
     return SUCCESS;
 }
+
+int list_reverse(List *this) {
+	if (this == NULL) {
+		return INV_PTR;
+	}
+	if (this->head == NULL || this->head->next == NULL) {
+		return INV_DATA;
+	}
+
+	Node *prev = NULL;
+	Node *currNd = this->head;
+	Node *nxt = this->head->next;
+	size_t size = list_size(this);
+
+	while (1) {
+		currNd->next = prev;
+		prev = currNd;
+		currNd = nxt;
+		if (nxt->next == NULL) {
+			currNd->next = prev;
+			this->head = currNd;
+			break;
+		}
+
+		nxt = nxt->next;
+		
+		
+	}
+	return SUCCESS;
+}
