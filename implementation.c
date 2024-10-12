@@ -314,3 +314,42 @@ int list_reverse(List *this) {
 	}
 	return SUCCESS;
 }
+
+// for sorted list
+int list_unique(List *this) {
+	if (this == NULL) {
+		return INV_PTR;
+	}
+	if (this->head == NULL) {
+		return INV_DATA;
+	}
+	if (this->head->next == NULL) {
+		return SUCCESS;
+	}
+	
+	Node *prev = this->head	;
+	Node *current = this->head;
+	Node *nxt = this->head->next;
+	int flag = 0;
+
+	while (nxt) {
+		if (current->value == nxt->value) {
+			free(current);
+			prev->next = nxt;
+			current = nxt;
+			nxt = nxt->next;
+			continue;
+		}
+		
+		if (!flag++ && current->value != nxt->value) {
+			this->head = current;
+			continue;
+		}
+
+		prev = current;
+		current = nxt;
+		nxt = nxt->next;
+	}
+
+	return SUCCESS;
+}
