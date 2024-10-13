@@ -353,3 +353,43 @@ int list_unique(List *this) {
 
 	return SUCCESS;
 }
+
+int list_merge(List *this, List *other) {
+	if (this == NULL || other == NULL) {
+		return INV_PTR;
+	}
+	if (this->head == NULL || other->head == NULL) {
+		return INV_DATA;
+	}
+	if (this == other) {
+		return SUCCESS;
+	}
+
+	Node *dummy = (Node*)malloc(sizeof(Node));
+	Node *tmpDmy = dummy;
+	Node *lstT = this->head;
+	Node *lstO = other->head;
+
+	while (lstT && lstO) {
+		if (lstT->value <= lstO->value) {
+			tmpDmy->next = lstT;
+			lstT = lstT->next;
+		} else {
+			tmpDmy->next = lstO;
+			lstO = lstO->next;
+		}
+
+		tmpDmy = tmpDmy->next;
+	}
+	if (lstT) {
+		tmpDmy->next = lstT;
+	}
+	if (lstO) {
+		tmpDmy->next = lstO;
+	}
+
+	this->head = dummy->next;
+	free(dummy);
+
+	return SUCCESS;
+}
